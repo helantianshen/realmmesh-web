@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RealmMesh · 风格 C 像素方块</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gui:#c6c6c6;
+  --gui-light:#ffffff;
+  --gui-dark:#555555;
+  --slot:#8b8b8b;
+  --ink:#3d3d3d;
+  --paper:#e8e8e8;
+  --gold:#f8c844;
+  --green:#5bd07a;
+  --red:#e2564a;
+  --panel:#2e2e33;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{image-rendering:pixelated}
+body{font-family:'Silkscreen','Inter','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif;
+  background:#221f2b;color:var(--paper);min-height:100vh;-webkit-font-smoothing:none;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit;color:inherit}
+.cjk{font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif}
+
+/* 像素图标 */
+.pxi{display:inline-block;position:relative;flex:none}
+.pxi i{position:absolute;left:0;top:0;display:block}
+
+/* 视图切换 */
+#view-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;position:relative}
+#view-app{display:none}
+body[data-view="app"] #view-login{display:none}
+body[data-view="app"] #view-app{display:block}
+
+/* ---------- 登录：黄昏全景 ---------- */
+.sky{position:fixed;inset:0;z-index:-2;background:linear-gradient(#171029 0%,#2b1a44 34%,#5a2d55 62%,#93504a 82%,#b06a4b 100%)}
+.stars{position:fixed;inset:0 0 46% 0;z-index:-2;
+  background-image:
+    radial-gradient(#fff 1px,transparent 1.6px),radial-gradient(#fff5 1px,transparent 1.6px);
+  background-size:190px 130px,110px 90px;background-position:12px 8px,64px 42px;opacity:.5}
+.clouds{position:fixed;left:0;right:0;top:12%;z-index:-1;height:120px;pointer-events:none}
+.cloud{position:absolute;background:#e9e2ee;box-shadow:0 0 0 2px #e9e2ee;opacity:.85;animation:cloudMove linear infinite}
+.cloud::before{content:"";position:absolute;left:-14px;top:6px;width:14px;height:8px;background:inherit}
+.cloud.c1{width:84px;height:12px;top:6px;animation-duration:64s}
+.cloud.c2{width:56px;height:10px;top:44px;opacity:.55;animation-duration:88s;animation-delay:-30s}
+.cloud.c3{width:110px;height:14px;top:82px;opacity:.4;animation-duration:110s;animation-delay:-70s}
+.cloud.c4{width:64px;height:10px;top:120px;opacity:.6;animation-duration:76s;animation-delay:-50s}
+@keyframes cloudMove{from{left:-140px}to{left:100%}}
+.hills{position:fixed;left:0;right:0;bottom:0;height:22vh;z-index:-1;pointer-events:none;
+  background:
+    conic-gradient(from 90deg at 50% 100%, #141b12 0 25%, transparent 0 50%, #141b12 0 75%, transparent 0) 0 0/48px 22vh,
+    linear-gradient(#1c2a18 0 70%, #16210f 70% 100%);
+  opacity:.9}
+
+/* 像素 Logo */
+.logo{margin-bottom:26px;text-align:center}
+.logo .pix-title{font-family:'Silkscreen';font-weight:700;font-size:clamp(30px,6vw,52px);letter-spacing:.06em;color:#f4f0e6;
+  text-shadow:4px 4px 0 #1a1424, 8px 8px 0 rgba(0,0,0,.28)}
+.logo .pix-title span{color:var(--gold);text-shadow:4px 4px 0 #3a2408, 8px 8px 0 rgba(0,0,0,.28)}
+.logo .sub{margin-top:14px;display:inline-block;font-size:13px;letter-spacing:.5em;color:#d8cfe0;padding:7px 16px 7px 22px;
+  background:rgba(14,10,20,.65);border:2px solid #0a0710;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
+.splash{position:absolute;transform:rotate(-14deg) translateY(-8px);margin-left:24px;font-size:12px;color:#f8ee58;font-weight:700;
+  text-shadow:2px 2px 0 #3a3208;animation:splash 1.1s ease-in-out infinite alternate;white-space:nowrap}
+@keyframes splash{from{transform:rotate(-14deg) scale(1)}to{transform:rotate(-14deg) scale(1.08)}}
+
+/* MC 面板 */
+.gui-panel{background:var(--gui);border-top:4px solid var(--gui-light);border-left:4px solid var(--gui-light);
+  border-right:4px solid var(--gui-dark);border-bottom:4px solid var(--gui-dark);box-shadow:0 0 0 4px #0d0a12, 0 18px 40px rgba(0,0,0,.5);
+  color:var(--ink);padding:22px}
+.gui-title{font-family:'Silkscreen';font-weight:700;font-size:15px;color:#404040;margin-bottom:4px}
+.gui-sub{font-size:10px;color:#5c5c5c;letter-spacing:.08em;margin-bottom:16px}
+
+.mc-field{margin-bottom:12px}
+.mc-field label{display:block;font-size:10px;color:#4a4a4a;margin-bottom:6px;letter-spacing:.1em}
+.mc-input{display:flex;align-items:center;background:#000;box-shadow:inset 2px 2px 0 #1c1c1c, inset -2px -2px 0 #343434, 0 0 0 2px #a0a0a0;
+  padding:0 10px;height:40px}
+.mc-input:focus-within{box-shadow:inset 2px 2px 0 #1c1c1c, inset -2px -2px 0 #343434, 0 0 0 2px #fff}
+.mc-input input{flex:1;background:none;border:none;outline:none;font-size:13px;color:#eee;letter-spacing:.04em}
+.mc-input input::placeholder{color:#666}
+.mc-hint{display:flex;gap:8px;font-size:10.5px;line-height:1.7;color:#4e4e4e;background:#b8b8b8;
+  border-top:2px solid #9c9c9c;border-left:2px solid #9c9c9c;border-right:2px solid #dcdcdc;border-bottom:2px solid #dcdcdc;
+  padding:8px 10px;margin:2px 0 14px}
+.mc-hint .pxi{transform:translateY(2px)}
+.mc-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:44px;
+  font-family:'Silkscreen';font-weight:700;font-size:13px;letter-spacing:.12em;color:#f0f0f0;
+  background:linear-gradient(#7f8b8f 0%, #6c767a 48%, #5f676b 52%, #525a5e 100%);
+  border-top:3px solid #b6bec0;border-left:3px solid #a2aaaa;border-right:3px solid #3a4043;border-bottom:3px solid #33383b;
+  text-shadow:2px 2px 0 #2f3436;transition:filter .12s;image-rendering:pixelated}
+.mc-btn:hover{filter:brightness(1.22);border-color:#eef4f5 #cfd8da #2a2f31 #232729}
+.mc-btn:active{transform:translateY(2px);border-top-color:#5f676b;border-bottom-color:#a2aaaa}
+.mc-btn.gold{background:linear-gradient(#e8b23e 0%, #cf9527 48%, #bd861d 52%, #a97414 100%);
+  border-top-color:#f8dc8e;border-left-color:#ecc76a;border-right-color:#7c5510;border-bottom-color:#6e4c0e;text-shadow:2px 2px 0 #6e4c0e}
+.mc-btn.gold:hover{filter:brightness(1.12)}
+.login-alt{margin-top:14px;display:flex;justify-content:center;gap:8px;font-size:10px;color:#5c5c5c;letter-spacing:.08em}
+.login-alt button{color:#3d6e4f;text-decoration:underline 2px;letter-spacing:.08em}
+.login-alt button:hover{color:#1f5c38}
+.login-foot{margin-top:24px;font-size:10.5px;color:#cfc6da;letter-spacing:.14em;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+.login-card{width:min(430px,100%);position:relative;z-index:1}
+
+/* ---------- 顶栏 ---------- */
+.app-bg{position:fixed;inset:0;z-index:-2;background:
+  conic-gradient(from 90deg at 50% 100%, #26262c 0 25%, transparent 0 50%, #26262c 0 75%, transparent 0) 0 0/44px 44px,
+  #212126}
+.app-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(1000px 500px at 50% -10%, rgba(120,90,200,.1), transparent 60%)}
+.topbar{position:sticky;top:0;z-index:50;background:#18181d;border-bottom:4px solid #101014;box-shadow:0 4px 0 rgba(0,0,0,.35);
+  display:flex;align-items:center;gap:18px;padding:12px 22px}
+.topbar .mini-logo{font-family:'Silkscreen';font-weight:700;font-size:16px;letter-spacing:.04em}
+.topbar .mini-logo span{color:var(--gold)}
+.topbar .mini-logo .m{color:#7fe07f}
+.nav{display:flex;gap:8px;margin-left:10px}
+.nav button{font-family:'Silkscreen';font-size:11px;letter-spacing:.06em;color:#9d98ab;padding:9px 14px;
+  background:#232329;border-top:2px solid #38383f;border-left:2px solid #38383f;border-right:2px solid #0e0e12;border-bottom:2px solid #0e0e12;
+  transition:filter .12s}
+.nav button:hover{filter:brightness(1.25)}
+.nav button.on{color:#101014;background:linear-gradient(#f2e6b0,#dcc268);border-color:#fff6cf #cbb14e #8f7a22 #a8912f;text-shadow:none}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.coin-chip{display:flex;align-items:center;gap:8px;font-size:12px;color:#f8e8a8;background:#232329;padding:8px 14px;
+  border-top:2px solid #38383f;border-left:2px solid #38383f;border-right:2px solid #0e0e12;border-bottom:2px solid #0e0e12}
+.player{display:flex;align-items:center;gap:9px}
+.player .who{text-align:right}
+.player .nm{font-size:11px;color:#eee}
+.player .role{font-size:9px;color:#8d8799}
+.btn-out{font-family:'Silkscreen';font-size:10px;color:#e2b0aa;padding:8px 12px;background:#2b1d1e;
+  border-top:2px solid #453032;border-left:2px solid #453032;border-right:2px solid #150d0e;border-bottom:2px solid #150d0e}
+.btn-out:hover{filter:brightness(1.3);color:#ff8f80}
+
+/* ---------- 主体 ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:26px 22px 80px}
+.sec-title{display:flex;align-items:center;gap:12px;margin:26px 0 12px}
+.sec-title .px{font-family:'Silkscreen';font-weight:700;font-size:14px;letter-spacing:.1em;color:#efeaf6;text-shadow:2px 2px 0 #101014}
+.sec-title .line{flex:1;height:4px;background:conic-gradient(from 90deg at 50% 50%, #34343c 0 25%, transparent 0 50%, #34343c 0 75%, transparent 0) 0 0/8px 4px}
+.sec-title .note{font-size:10px;color:#8d8799}
+
+/* 状态槽排 */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{background:var(--gui);color:var(--ink);padding:14px 14px 12px;
+  border-top:4px solid var(--gui-light);border-left:4px solid var(--gui-light);border-right:4px solid var(--gui-dark);border-bottom:4px solid var(--gui-dark);
+  box-shadow:0 0 0 3px #101014}
+.stat .head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.stat .nm{font-family:'Silkscreen';font-size:10px;letter-spacing:.06em;color:#4c4c4c}
+.stat .big{display:flex;align-items:baseline;gap:6px}
+.stat .val{font-family:'Silkscreen';font-weight:700;font-size:22px;color:#2f2f2f}
+.stat .unit{font-size:10px;color:#6d6d6d}
+.slot-meter{display:flex;gap:2px;margin-top:9px}
+.slot-meter i{width:9px;height:9px;background:#6f6f6f;box-shadow:inset 1px 1px 0 #4c4c4c}
+.slot-meter i.f{background:#57c46f;box-shadow:inset 1px 1px 0 #2f8a46}
+.slot-meter i.warn{background:#d8b23c;box-shadow:inset 1px 1px 0 #97781f}
+.stat .delta{margin-top:8px;font-size:9.5px;color:#2f7a44}
+
+/* 物品栏 */
+.inv-panel{background:var(--gui);color:var(--ink);padding:14px;
+  border-top:4px solid var(--gui-light);border-left:4px solid var(--gui-light);border-right:4px solid var(--gui-dark);border-bottom:4px solid var(--gui-dark);
+  box-shadow:0 0 0 3px #101014}
+.inv-tabs{display:flex;gap:2px;margin:-14px -14px 10px;padding:0 6px;position:relative;top:-10px;margin-bottom:-4px}
+.inv-tabs button{font-family:'Silkscreen';font-size:10px;letter-spacing:.05em;color:#e8e8e8;padding:9px 14px 11px;
+  background:#2f2f36;border-top:3px solid #4a4a54;border-left:3px solid #4a4a54;border-right:3px solid #16161b;border-bottom:none}
+.inv-tabs button:hover{filter:brightness(1.3)}
+.inv-tabs button.on{background:var(--gui);color:#2f2f2f;border-top-color:#fff;border-left-color:#fff;border-right-color:#555}
+.inv-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.slot{position:relative;aspect-ratio:1;background:var(--slot);
+  box-shadow:inset 3px 3px 0 #373737, inset -3px -3px 0 #fff;display:grid;place-items:center;cursor:pointer}
+.slot:hover::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.45)}
+.slot.empty::before{content:"+";font-family:'Silkscreen';font-size:15px;color:#757575}
+.slot .cnt{position:absolute;right:3px;bottom:1px;font-family:'Silkscreen';font-weight:700;font-size:11px;color:#fff;
+  text-shadow:2px 2px 0 #3f3f3f;pointer-events:none}
+.slot .rare-glint{position:absolute;left:4px;top:4px;width:5px;height:5px;background:#c69bff;box-shadow:0 0 6px #a05cff}
+.inv-foot{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:9.5px;color:#4e4e4e}
+.inv-foot .pill{background:#3d3d3d;color:#dedede;font-size:9px;padding:3px 8px;box-shadow:inset 1px 1px 0 #232323}
+.inv-foot .tip{margin-left:auto;color:#5c5c5c}
+
+/* Tooltip（MC 风格） */
+#tip{position:fixed;z-index:99;pointer-events:none;display:none;background:rgba(16,0,16,.94);
+  border:2px solid rgba(86,0,255,.44);outline:2px solid rgba(20,0,30,.9);padding:8px 12px;min-width:150px}
+#tip .t1{font-family:'Silkscreen';font-size:11px;color:#fff;margin-bottom:5px}
+#tip .t2{font-size:10px;color:#a9a2b8;line-height:1.8}
+#tip .t2 b{color:#7be08f;font-weight:400}
+#tip .t2 .warn{color:#f0c060}
+
+/* 聊天动态 */
+.chat-panel{background:rgba(8,8,12,.82);border:2px solid #0a0a10;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);padding:14px 16px}
+.chat-row{display:flex;gap:10px;padding:7px 4px;font-size:12px;line-height:1.6;border-bottom:2px solid rgba(255,255,255,.05)}
+.chat-row:last-child{border-bottom:none}
+.chat-row .tm{color:#8d8799;flex:none}
+.chat-row .sys{color:#b9b2c8}
+.chat-row b{color:#fff;font-weight:400}
+.chat-row .in{color:#7be08f}
+.chat-row .out{color:#f0c060}
+.chat-row .bonus{color:#8fd4ff}
+.chat-row .warn{color:#ff8f80}
+
+/* 服务器 MOTD */
+.srv-panel .srow{display:flex;align-items:center;gap:12px;padding:10px 6px;background:rgba(8,8,12,.82);
+  border:2px solid #0a0a10;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);margin-bottom:8px}
+.srv-panel .lamp{width:12px;height:12px;flex:none;box-shadow:inset -2px -2px 0 rgba(0,0,0,.35)}
+.lamp.on{background:#57c46f;animation:lampBlink 2.4s steps(2) infinite}
+.lamp.warn{background:#d8b23c}
+@keyframes lampBlink{0%,88%{filter:brightness(1)}94%{filter:brightness(1.7)}}
+.srv-panel .motd{flex:1}
+.srv-panel .sname{font-family:'Silkscreen';font-size:11px;color:#efeaf6}
+.srv-panel .sdesc{font-size:10px;color:#8d8799;margin-top:3px}
+.srv-panel .ping{font-family:'Silkscreen';font-size:10px;color:#7be08f}
+.srv-panel .ping.w{color:#d8b23c}
+
+.two-col{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start;margin-top:2px}
+
+/* 成就 Toast */
+#toast{position:fixed;right:-420px;top:20px;z-index:120;width:340px;display:flex;gap:12px;align-items:center;
+  background:var(--gui);color:var(--ink);padding:12px 16px;
+  border-top:4px solid var(--gui-light);border-left:4px solid var(--gui-light);border-right:4px solid var(--gui-dark);border-bottom:4px solid var(--gui-dark);
+  box-shadow:0 0 0 3px #101014, 0 14px 30px rgba(0,0,0,.5);
+  transition:right .45s steps(8)}
+#toast.show{right:20px}
+#toast .tslot{width:44px;height:44px;background:var(--slot);box-shadow:inset 3px 3px 0 #373737, inset -3px -3px 0 #fff;display:grid;place-items:center;flex:none}
+#toast .tt{font-family:'Silkscreen';font-size:10px;color:#f8c844;text-shadow:1px 1px 0 #7c5c10;margin-bottom:5px}
+#toast .td{font-size:11px;color:#3d3d3d;line-height:1.6}
+
+.style-badge{position:fixed;left:16px;bottom:14px;z-index:60;font-size:10px;letter-spacing:.08em;color:#b7b0c4;
+  border:2px solid #34343c;padding:6px 12px;background:rgba(16,16,22,.85)}
+.style-badge b{color:var(--gold);font-weight:400;margin-right:6px}
+
+/* 入场 */
+body[data-view="login"] .login-card{animation:pop .4s steps(5) both}
+body[data-view="login"] .logo{animation:pop .4s .05s steps(5) both}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+body[data-view="app"] .rise{animation:pop .35s steps(4) both}
+body[data-view="app"] #view-app .d1{animation-delay:.05s}
+body[data-view="app"] #view-app .d2{animation-delay:.12s}
+body[data-view="app"] #view-app .d3{animation-delay:.19s}
+
+@media (max-width:960px){
+  .stat-row{grid-template-columns:1fr 1fr}
+  .inv-grid{grid-template-columns:repeat(6,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .nav{display:none}
+}
+@media (max-width:600px){
+  .inv-grid{grid-template-columns:repeat(5,1fr)}
+  .stat-row{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;gap:10px}
+  .player .who{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body data-view="login">
+<div class="sky"></div><div class="stars"></div>
+<div class="clouds" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+</div>
+<div class="hills" aria-hidden="true"></div>
+<div class="style-badge"><b>风格 C</b>像素方块 · 静态原型</div>
+
+<!-- ============ 登录 ============ -->
+<section id="view-login">
+  <div class="logo">
+    <div class="pix-title">REALM<span>MESH</span><span class="splash" style="position:relative;display:inline-block;margin-left:10px">跨服仓库已开启!</span></div>
+    <div class="sub">领域网格 · 中心账户</div>
+  </div>
+  <div class="login-card gui-panel">
+    <div class="gui-title">登录中心账户</div>
+    <div class="gui-sub">REGISTER / LOGIN</div>
+    <form id="login-form">
+      <div class="mc-field">
+        <label>玩家名 PLAYER NAME</label>
+        <div class="mc-input">
+          <input placeholder="3-16 letters / digits / _" autocomplete="username">
+        </div>
+      </div>
+      <div class="mc-field">
+        <label>密码 PASSWORD</label>
+        <div class="mc-input">
+          <input id="f-pass" type="password" placeholder="6-12 chars, case-sensitive" autocomplete="current-password">
+        </div>
+      </div>
+      <div class="mc-hint">
+        <span class="pxi" data-pix="tnt" data-s="2.4"><i></i></span>
+        <span class="cjk">连续 3 次输错密码将进入 5 分钟休息期，所有服务器共享计数；成功登录自动清零。</span>
+      </div>
+      <button class="mc-btn gold" type="submit">▸ 进入我的资产</button>
+      <div class="login-alt cjk">还没有账户？<button type="button" data-toast="演示原型：注册仅作展示">注册新账户</button></div>
+    </form>
+  </div>
+  <p class="login-foot">不进游戏服务器，也能管理中心资产</p>
+</section>
+
+<!-- ============ 总览 ============ -->
+<div class="app-bg" aria-hidden="true"></div>
+<main id="view-app">
+  <header class="topbar">
+    <div class="mini-logo"><span class="m">◆</span> REALM<span>MESH</span></div>
+    <nav class="nav">
+      <button class="on" type="button">总览</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">仓库</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">动态</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">服务器</button>
+    </nav>
+    <div class="top-right">
+      <div class="coin-chip"><span class="pxi" data-pix="diamond" data-s="2.6"><i></i></span><span class="mono" id="coin-top">12,480</span></div>
+      <div class="player">
+        <div class="who"><div class="nm">Alex_Craft</div><div class="role">玩家 · 在线</div></div>
+        <span class="pxi" data-pix="steve" data-s="4.4"><i></i></span>
+      </div>
+      <button class="btn-out" type="button" id="btn-logout">退出</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="sec-title rise d1" style="margin-top:6px">
+      <span class="px">▸ 资产状态 STATUS</span><span class="line"></span><span class="note cjk">最后同步 2 分钟前</span>
+    </div>
+    <div class="stat-row rise d1">
+      <div class="stat">
+        <div class="head"><span class="pxi" data-pix="diamond" data-s="3"><i></i></span><span class="nm">虚拟货币</span></div>
+        <div class="big"><span class="val mono">12,480</span><span class="unit">金币</span></div>
+        <div class="delta cjk">▲ 本周 +320</div>
+      </div>
+      <div class="stat">
+        <div class="head"><span class="pxi" data-pix="chest" data-s="3"><i></i></span><span class="nm cjk">共享仓库</span></div>
+        <div class="big"><span class="val mono">238</span><span class="unit">/ 320 格</span></div>
+        <div class="slot-meter" aria-label="238/320">
+          <i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="head"><span class="pxi" data-pix="grass" data-s="3"><i></i></span><span class="nm cjk">接入服务器</span></div>
+        <div class="big"><span class="val mono">3</span><span class="unit">/ 4 在线</span></div>
+        <div class="delta cjk" style="color:#946a1c">模组服维护中</div>
+      </div>
+      <div class="stat">
+        <div class="head"><span class="pxi" data-pix="book" data-s="3"><i></i></span><span class="nm cjk">本月流转</span></div>
+        <div class="big"><span class="val mono">86</span><span class="unit">笔</span></div>
+        <div class="delta cjk">存入 61 · 取出 25</div>
+      </div>
+    </div>
+
+    <div class="sec-title rise d2"><span class="px">▸ 共享仓库 WAREHOUSE</span><span class="line"></span><span class="note cjk">悬停查看详情 · 点击模拟取出</span></div>
+    <div class="inv-panel rise d2">
+      <div class="inv-tabs" id="wh-tabs">
+        <button class="on" data-cat="all" type="button">全部</button>
+        <button data-cat="mat" type="button">材料</button>
+        <button data-cat="tool" type="button">工具</button>
+        <button data-cat="build" type="button">建筑</button>
+        <button data-cat="use" type="button">补给</button>
+      </div>
+      <div class="inv-grid" id="wh-items">
+        <div class="slot item" data-cat="mat" data-name="钻石" data-rare="1" data-desc="稀有材料 · 生存一服存入">
+          <span class="rare-glint"></span><span class="pxi" data-pix="diamond" data-s="4"><i></i></span><span class="cnt">64</span>
+        </div>
+        <div class="slot item" data-cat="mat" data-name="金锭" data-desc="常见材料 · 熔炉产物">
+          <span class="pxi" data-pix="gold" data-s="4.4"><i></i></span><span class="cnt">128</span>
+        </div>
+        <div class="slot item" data-cat="mat" data-name="绿宝石" data-desc="常见材料 · 村民交易货币">
+          <span class="pxi" data-pix="emerald" data-s="4"><i></i></span><span class="cnt">32</span>
+        </div>
+        <div class="slot item" data-cat="mat" data-name="下界合金锭" data-rare="1" data-desc="稀有材料 · 高价值">
+          <span class="rare-glint"></span><span class="pxi" data-pix="netherite" data-s="4.4"><i></i></span><span class="cnt">12</span>
+        </div>
+        <div class="slot item" data-cat="mat" data-name="末影珍珠" data-desc="材料 · 快速移动用">
+          <span class="pxi" data-pix="pearl" data-s="4"><i></i></span><span class="cnt">16</span>
+        </div>
+        <div class="slot item" data-cat="use" data-name="喷溅治疗药水" data-desc="消耗品 · 即时恢复生命">
+          <span class="pxi" data-pix="potion" data-s="4"><i></i></span><span class="cnt">6</span>
+        </div>
+        <div class="slot item" data-cat="tool" data-name="附魔书 · 经验修补" data-rare="1" data-desc="稀有工具 · 模组服存入">
+          <span class="rare-glint"></span><span class="pxi" data-pix="book" data-s="4"><i></i></span><span class="cnt">1</span>
+        </div>
+        <div class="slot item" data-cat="build" data-name="白色混凝土" data-desc="建材 · 整组存入">
+          <span class="pxi" data-pix="concrete" data-s="4"><i></i></span><span class="cnt">256</span>
+        </div>
+        <div class="slot item" data-cat="use" data-name="TNT" data-desc="红石 · 危险品 · 取出需确认">
+          <span class="pxi" data-pix="tnt" data-s="4"><i></i></span><span class="cnt">8</span>
+        </div>
+        <div class="slot empty" data-toast="演示原型：存入需要连接游戏服务器"></div>
+      </div>
+      <div class="inv-foot cjk">
+        <span class="pill">238 / 320</span>
+        <span>跨服同步 · 拒绝取出目标服无法识别的物品</span>
+        <span class="tip">EMPTY SLOT = 可存入</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="rise d3">
+        <div class="sec-title"><span class="px">▸ 近期动态 CHAT.LOG</span><span class="line"></span></div>
+        <div class="chat-panel">
+          <div class="chat-row"><span class="tm">14:32</span><span class="sys cjk"><b>[生存一服]</b> 存入 <b class="in">钻石 ×64</b> · 已入库</span></div>
+          <div class="chat-row"><span class="tm">13:05</span><span class="sys cjk"><b>[创造服]</b> 取出 <b class="out">金锭 ×32</b> · 已发放至背包</span></div>
+          <div class="chat-row"><span class="tm">09:47</span><span class="sys cjk"><b>[Web]</b> 登录奖励 <b class="bonus">+50 金币</b></span></div>
+          <div class="chat-row"><span class="tm">昨 22:10</span><span class="sys cjk"><b>[模组服]</b> 存入 <b class="in">鞘翅 ×1</b> · 已入库</span></div>
+          <div class="chat-row"><span class="tm">昨 21:58</span><span class="sys cjk"><b>[中心]</b> 修改密码成功，<span class="warn">所有在线会话已被踢出</span></span></div>
+        </div>
+      </div>
+      <div class="rise d3">
+        <div class="sec-title"><span class="px">▸ 接入服务器 SERVERS</span><span class="line"></span></div>
+        <div class="srv-panel">
+          <div class="srow"><span class="lamp on"></span><div class="motd"><div class="sname">SURVIVAL-1</div><div class="sdesc cjk">生存一服 · 白名单制</div></div><span class="ping">12ms</span></div>
+          <div class="srow"><span class="lamp on"></span><div class="motd"><div class="sname">CREATIVE</div><div class="sdesc cjk">创造服 · 自由建筑</div></div><span class="ping">23ms</span></div>
+          <div class="srow"><span class="lamp on"></span><div class="motd"><div class="sname">GAMES</div><div class="sdesc cjk">小游戏服 · 起床战争</div></div><span class="ping">41ms</span></div>
+          <div class="srow"><span class="lamp warn"></span><div class="motd"><div class="sname">MODDED</div><div class="sdesc cjk">模组服 · 维护中</div></div><span class="ping w">--</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="tip"><div class="t1"></div><div class="t2 cjk"></div></div>
+<div id="toast">
+  <div class="tslot"><span class="pxi" data-pix="diamond" data-s="3.4"><i></i></span></div>
+  <div><div class="tt">演示原型 DEMO</div><div class="td cjk" id="toast-text"></div></div>
+</div>
+
+<script>
+const PIX = {
+  diamond:{pal:{o:'#0e6b64',l:'#5ce0d6',h:'#ccfff9',d:'#2aa79c'},rows:['....oo....','...ollo...','..olhhlo..','.olhhlllo.','olhhlllllo','ollllllddo','.ollllddo.','..ollddo..','...oddo...','....oo....']},
+  emerald:{pal:{o:'#0a6b39',l:'#2ecc71',h:'#a7f3c9',d:'#169257'},rows:['....oo....','...ollo...','..olhhlo..','.olhhlllo.','olhhlllllo','ollllllddo','.ollllddo.','..ollddo..','...oddo...','....oo....']},
+  gold:{pal:{o:'#8a5a0a',g:'#f2b53a',h:'#ffe38a',d:'#c9871c'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  netherite:{pal:{o:'#15151a',g:'#4a4550',h:'#8d8391',d:'#332f38'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  pearl:{pal:{o:'#0e2a2a',b:'#0f5f5f',l:'#1fa8a8',h:'#7beaea',p:'#7c4dbf'},rows:['...oooo...','..obbbbo..','.oblhbbpbo','obhhhbbbbo','oblbbbbpbo','obbbbbbbbo','obpbbbblbo','.obbbbbbo.','..obbbbo..','...oooo...']},
+  potion:{pal:{o:'#1c2b2b',b:'#bfe3dc',h:'#ffffff',g:'#7ce75a'},rows:['....oo....','...obbo...','...obbo...','..obbbbo..','.obbhbbbo.','.obggggbo.','obggggggbo','obggggggbo','.oggggggo.','..oooooo..']},
+  book:{pal:{o:'#3a2410',R:'#b0542c',p:'#e8d9b0',s:'#9ef7dd',g:'#4a3218'},rows:['..........','.oooooooo.','oRpppppppo','oRppsgpppo','oRpppppppo','oRpppppppo','oRpppppppo','oRpppppppo','.oooooooo.','..........']},
+  concrete:{pal:{o:'#8f8f8f',l:'#f2f2f2',w:'#e3e3e3',d:'#c9c9c9'},rows:['oooooooooo','ollllllllo','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','oddddddddo','oooooooooo']},
+  tnt:{pal:{o:'#6e1c1c',r:'#b03a3a',R:'#d95b4a',w:'#e8dcc8',k:'#22222a'},rows:['.oooooooooo.','orrrrrrrrrro','orRRRRRRRRro','owwwwwwwwwwo','owwkwwwkkwwo','owwwwwwwwwwo','orRRRRRRRRro','orrrrrrrrrro','.oooooooooo.']},
+  chest:{pal:{o:'#3a2410',w:'#9a6b2f',W:'#b5834a',k:'#2a2a2a',g:'#8a8a8a'},rows:['..oooooooo..','.oWWWWWWWWo.','.owwwwwwwwo.','.ooookkoooo.','oggoowwooggo','oggoowwooggo','oggoowwooggo','oggowwwooggo','.oowwwwwwoo.','..oooooooo..']},
+  grass:{pal:{o:'#2f5a23',g:'#5aa03c',G:'#7fc95a',d:'#6b4a2a',D:'#8a6538'},rows:['oooooooooo','oGGgGGgGGo','oGgGGGgGGo','oggggggggo','odDDddDDdo','odDddddDDo','oddDDddDdo','oddddDDddo','odDdddddDo','oooooooooo']},
+  steve:{pal:{h:'#3a2a17',s:'#c68e64',e:'#ffffff',b:'#4a3fa8',m:'#8a5a4a'},rows:['hhhhhhhh','hhhhhhhh','hssssssh','sebssebs','ssssssss','ssssssss','ssmmmmss','ssssssss']}
+};
+document.querySelectorAll('.pxi').forEach(el=>{
+  const def = PIX[el.dataset.pix]; if(!def) return;
+  const s = parseFloat(el.dataset.s || '3');
+  const rows = def.rows, shadows = [];
+  rows.forEach((row,y)=>{ [...row].forEach((ch,x)=>{
+    const c = def.pal[ch]; if(c) shadows.push(`${x*s}px ${y*s}px 0 ${c}`);
+  });});
+  el.style.width = rows[0].length*s + 'px';
+  el.style.height = rows.length*s + 'px';
+  const i = el.querySelector('i');
+  i.style.width = s+'px'; i.style.height = s+'px';
+  i.style.boxShadow = shadows.join(',');
+});
+
+const body = document.body;
+document.getElementById('login-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  body.dataset.view = 'app';
+  window.scrollTo(0,0);
+});
+document.getElementById('btn-logout').addEventListener('click', ()=>{
+  body.dataset.view = 'login';
+  window.scrollTo(0,0);
+});
+
+/* Tooltip */
+const tip = document.getElementById('tip');
+const tipT1 = tip.querySelector('.t1');
+const tipT2 = tip.querySelector('.t2');
+document.addEventListener('mousemove', e=>{
+  const it = e.target.closest('.slot.item');
+  if(it && body.dataset.view === 'app'){
+    tipT1.textContent = it.dataset.name;
+    tipT2.innerHTML = (it.dataset.rare ? '<span style="color:#c69bff">◆ 稀有物品</span><br>' : '') +
+      it.dataset.desc + '<br>数量 <b>× ' + it.querySelector('.cnt').textContent + '</b>';
+    tip.style.display = 'block';
+    let x = e.clientX + 18, y = e.clientY - 12;
+    if(x + 210 > innerWidth) x = e.clientX - 220;
+    if(y + 110 > innerHeight) y = innerHeight - 118;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }else{
+    tip.style.display = 'none';
+  }
+});
+
+/* 仓库筛选 */
+document.getElementById('wh-tabs').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#wh-tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const cat = b.dataset.cat;
+  document.querySelectorAll('#wh-items .slot').forEach(it=>{
+    it.style.display = (cat === 'all' || (it.dataset.cat||'').split(' ').includes(cat)) ? '' : 'none';
+  });
+});
+
+/* 成就 Toast */
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toast-text');
+let toastTimer;
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2600);
+}
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-toast]');
+  if(t){ showToast(t.dataset.toast); return; }
+  const it = e.target.closest('.slot.item');
+  if(it) showToast('已请求取出 ' + it.dataset.name + '（演示，不执行真实操作）');
+});
+</script>
+</body>
+</html>

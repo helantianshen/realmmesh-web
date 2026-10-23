@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RealmMesh · 风格 A 极光玻璃</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e1a;
+  --ink:#eef2f8;
+  --ink-2:#a7b2c6;
+  --ink-3:#6b7690;
+  --emerald:#34d8b4;
+  --emerald-deep:#10b981;
+  --cyan:#4fd8e8;
+  --violet:#8b7cf6;
+  --amber:#f0b45c;
+  --glass:rgba(255,255,255,.055);
+  --glass-strong:rgba(255,255,255,.085);
+  --line:rgba(255,255,255,.1);
+  --line-soft:rgba(255,255,255,.06);
+  --radius:18px;
+  --font-body:'Inter','Space Grotesk',-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif;
+  --font-disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:rgba(52,216,180,.28)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ---------- 背景 ---------- */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
+  radial-gradient(1200px 700px at 78% -12%, rgba(79,216,232,.075), transparent 60%),
+  radial-gradient(1000px 600px at -8% 108%, rgba(139,124,246,.075), transparent 60%),
+  var(--bg);}
+.bg .grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 32%,#000 30%,transparent 75%);
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 32%,#000 30%,transparent 75%);}
+.blob{position:absolute;border-radius:50%;filter:blur(110px);opacity:.5;will-change:transform}
+.blob-1{width:560px;height:560px;left:-140px;top:-120px;background:radial-gradient(circle,#10b98166,transparent 70%);animation:drift1 22s ease-in-out infinite alternate}
+.blob-2{width:640px;height:640px;right:-180px;top:6%;background:radial-gradient(circle,#4fd8e84d,transparent 70%);animation:drift2 26s ease-in-out infinite alternate}
+.blob-3{width:520px;height:520px;left:34%;bottom:-220px;background:radial-gradient(circle,#8b7cf63d,transparent 70%);animation:drift3 30s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(120px,90px) scale(1.12)}}
+@keyframes drift2{to{transform:translate(-140px,60px) scale(.92)}}
+@keyframes drift3{to{transform:translate(80px,-110px) scale(1.08)}}
+.bg .noise{position:absolute;inset:0;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ---------- 风格角标 ---------- */
+.style-badge{position:fixed;left:16px;bottom:14px;z-index:60;font-size:11px;letter-spacing:.08em;
+  color:var(--ink-3);border:1px solid var(--line-soft);border-radius:999px;padding:5px 12px;
+  background:rgba(10,14,26,.55);backdrop-filter:blur(8px)}
+.style-badge b{color:var(--emerald);font-weight:600;margin-right:6px}
+
+/* ---------- 通用 ---------- */
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:var(--radius);
+  backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35);
+  box-shadow:0 24px 60px -24px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);}
+.disp{font-family:var(--font-disp)}
+.mono{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* ---------- 像素图标 ---------- */
+.pxi{display:inline-block;position:relative;flex:none;image-rendering:pixelated}
+.pxi i{position:absolute;left:0;top:0;display:block}
+
+/* ---------- 视图切换 ---------- */
+#view-login{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:48px 20px;position:relative}
+#view-app{display:none}
+body[data-view="app"] #view-login{display:none}
+body[data-view="app"] #view-app{display:block}
+
+/* ---------- 3D 方块 ---------- */
+.cube-scene{position:relative;height:210px;width:260px;margin-bottom:-6px;perspective:900px}
+.cube{position:absolute;transform-style:preserve-3d;animation:cubeFloat 7s ease-in-out infinite}
+.cube .f{position:absolute;inset:0;background:rgba(52,216,180,.05);border:1px solid rgba(52,216,180,.38);
+  box-shadow:inset 0 0 22px rgba(52,216,180,.12)}
+.cube-1{width:88px;height:88px;left:86px;top:34px;animation-name:cubeFloat}
+.cube-2{width:46px;height:46px;left:196px;top:118px;animation:cubeFloat 5.5s ease-in-out -2.2s infinite}
+.cube-3{width:30px;height:30px;left:52px;top:142px;animation:cubeFloat 6.2s ease-in-out -4s infinite;opacity:.8}
+.cube-1 .f:nth-child(1){transform:rotateY(0deg) translateZ(44px)}
+.cube-1 .f:nth-child(2){transform:rotateY(90deg) translateZ(44px)}
+.cube-1 .f:nth-child(3){transform:rotateY(180deg) translateZ(44px)}
+.cube-1 .f:nth-child(4){transform:rotateY(-90deg) translateZ(44px)}
+.cube-1 .f:nth-child(5){transform:rotateX(90deg) translateZ(44px);border-color:rgba(79,216,232,.5)}
+.cube-1 .f:nth-child(6){transform:rotateX(-90deg) translateZ(44px)}
+.cube-2 .f:nth-child(1){transform:rotateY(0deg) translateZ(23px)}
+.cube-2 .f:nth-child(2){transform:rotateY(90deg) translateZ(23px)}
+.cube-2 .f:nth-child(3){transform:rotateY(180deg) translateZ(23px)}
+.cube-2 .f:nth-child(4){transform:rotateY(-90deg) translateZ(23px)}
+.cube-2 .f:nth-child(5){transform:rotateX(90deg) translateZ(23px);border-color:rgba(139,124,246,.5)}
+.cube-2 .f:nth-child(6){transform:rotateX(-90deg) translateZ(23px)}
+.cube-3 .f{border-color:rgba(139,124,246,.4)}
+.cube-3 .f:nth-child(1){transform:rotateY(0deg) translateZ(15px)}
+.cube-3 .f:nth-child(2){transform:rotateY(90deg) translateZ(15px)}
+.cube-3 .f:nth-child(3){transform:rotateY(180deg) translateZ(15px)}
+.cube-3 .f:nth-child(4){transform:rotateY(-90deg) translateZ(15px)}
+.cube-3 .f:nth-child(5){transform:rotateX(90deg) translateZ(15px)}
+.cube-3 .f:nth-child(6){transform:rotateX(-90deg) translateZ(15px)}
+@keyframes cubeFloat{
+  0%,100%{transform:rotateX(-22deg) rotateY(38deg) translateY(0)}
+  50%{transform:rotateX(-18deg) rotateY(52deg) translateY(-14px)}}
+
+/* ---------- 登录卡 ---------- */
+.login-card{width:min(420px,100%);padding:38px 36px 30px;position:relative;overflow:hidden}
+.login-card::before{content:"";position:absolute;left:10%;right:10%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(52,216,180,.6),transparent)}
+.brand{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.brand .mark{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(52,216,180,.16),rgba(79,216,232,.1));
+  border:1px solid rgba(52,216,180,.35)}
+.brand .name{font-family:var(--font-disp);font-weight:700;font-size:18px;letter-spacing:.02em}
+.brand .name span{color:var(--emerald)}
+.brand .sub{font-size:11px;color:var(--ink-3);letter-spacing:.28em;margin-top:2px}
+.login-card h1{font-family:var(--font-disp);font-size:24px;font-weight:600;letter-spacing:.01em}
+.login-card .lede{color:var(--ink-2);font-size:13.5px;margin:8px 0 24px}
+.ltab{display:flex;gap:4px;padding:4px;background:rgba(0,0,0,.28);border-radius:12px;margin-bottom:20px;
+  border:1px solid var(--line-soft)}
+.ltab button{flex:1;padding:9px 0;border-radius:9px;font-size:13.5px;color:var(--ink-3);font-weight:500;
+  transition:all .25s}
+.ltab button.on{background:var(--glass-strong);color:var(--ink);box-shadow:0 4px 14px -6px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:7px;letter-spacing:.04em}
+.field .box{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.3);
+  border:1px solid var(--line-soft);border-radius:12px;padding:0 14px;transition:border-color .25s,box-shadow .25s}
+.field .box:focus-within{border-color:rgba(52,216,180,.55);box-shadow:0 0 0 3px rgba(52,216,180,.14)}
+.field .box svg{flex:none;opacity:.5}
+.field input{flex:1;background:none;border:none;outline:none;height:44px;font-size:14px}
+.field input::placeholder{color:var(--ink-3)}
+.eye{opacity:.5;padding:4px;display:grid;place-items:center;transition:opacity .2s}
+.eye:hover{opacity:.9}
+.hint{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--ink-3);
+  background:rgba(79,216,232,.06);border:1px solid rgba(79,216,232,.16);border-radius:10px;
+  padding:9px 12px;margin:4px 0 18px;line-height:1.55}
+.hint svg{flex:none;margin-top:1px;color:var(--cyan);opacity:.8}
+.btn-primary{position:relative;width:100%;height:46px;border-radius:12px;overflow:hidden;
+  font-size:14.5px;font-weight:600;color:#052018;
+  background:linear-gradient(120deg,var(--emerald),#63e6c8 55%,var(--cyan));
+  box-shadow:0 12px 30px -10px rgba(52,216,180,.45);
+  transition:transform .18s,box-shadow .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary::after{content:"";position:absolute;top:0;bottom:0;left:-70%;width:45%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-18deg);transition:left .55s ease}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px rgba(52,216,180,.55)}
+.btn-primary:hover::after{left:130%}
+.btn-primary:active{transform:translateY(0)}
+.login-foot{margin-top:22px;font-size:12.5px;color:var(--ink-3);letter-spacing:.02em}
+
+/* ---------- 顶栏 ---------- */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:26px;
+  padding:14px 28px;border-bottom:1px solid var(--line-soft);
+  background:rgba(10,14,26,.72);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3)}
+.topbar .brand .name{font-size:15.5px}
+.topbar .brand .mark{width:32px;height:32px;border-radius:9px}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav button{padding:8px 16px;border-radius:10px;font-size:13.5px;color:var(--ink-2);font-weight:500;transition:all .22s}
+.nav button:hover{color:var(--ink);background:var(--glass)}
+.nav button.on{color:var(--emerald);background:rgba(52,216,180,.1);box-shadow:inset 0 0 0 1px rgba(52,216,180,.22)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.user-chip{display:flex;align-items:center;gap:10px;padding:5px 14px 5px 6px;border-radius:999px;
+  background:var(--glass);border:1px solid var(--line-soft);transition:border-color .2s}
+.user-chip:hover{border-color:var(--line)}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#052018;
+  background:linear-gradient(135deg,var(--emerald),var(--cyan))}
+.user-chip .un{font-size:13px;font-weight:600}
+.icon-btn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--ink-2);
+  border:1px solid transparent;transition:all .2s}
+.icon-btn:hover{color:var(--ink);background:var(--glass);border-color:var(--line-soft)}
+
+/* ---------- 主体 ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:30px 28px 70px}
+.hero{display:grid;grid-template-columns:1.9fr 1fr;gap:18px;margin-bottom:18px}
+.balance{position:relative;overflow:hidden;padding:26px 28px;display:flex;flex-direction:column;justify-content:space-between;min-height:172px}
+.balance::before{content:"";position:absolute;inset:-120%;
+  background:conic-gradient(from 0deg,transparent 0 40%,rgba(52,216,180,.16) 47%,rgba(79,216,232,.2) 50%,rgba(139,124,246,.16) 53%,transparent 60% 100%);
+  animation:sheen 9s linear infinite}
+@keyframes sheen{to{transform:rotate(1turn)}}
+.balance>*{position:relative}
+.balance .lbl{font-size:12px;letter-spacing:.22em;color:var(--ink-3)}
+.balance .num{font-family:var(--font-disp);font-size:46px;font-weight:700;letter-spacing:.01em;margin-top:10px;
+  background:linear-gradient(100deg,#fff 30%,#9ff5df 70%,#7fe6f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.balance .num small{font-size:15px;font-weight:500;color:var(--ink-2);-webkit-text-fill-color:var(--ink-2);margin-left:8px;letter-spacing:.06em}
+.delta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:#7ceccb;
+  background:rgba(52,216,180,.1);border:1px solid rgba(52,216,180,.24);padding:4px 11px;border-radius:999px;margin-top:14px;width:fit-content}
+.stat-cards{display:grid;grid-template-rows:1fr 1fr;gap:18px}
+.stat{padding:18px 20px;display:flex;align-items:center;gap:15px;transition:transform .25s,border-color .25s}
+.stat:hover{transform:translateY(-3px);border-color:var(--line)}
+.stat .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ico.v{background:rgba(139,124,246,.12);color:#b3a7fb;border:1px solid rgba(139,124,246,.25)}
+.ico.c{background:rgba(79,216,232,.1);color:#7fe6f0;border:1px solid rgba(79,216,232,.24)}
+.stat .k{font-size:12px;color:var(--ink-3);letter-spacing:.05em}
+.stat .v{font-family:var(--font-disp);font-size:20px;font-weight:600;margin-top:3px}
+.stat .v small{font-size:12px;color:var(--ink-3);font-weight:400}
+.meter{height:5px;border-radius:99px;background:rgba(255,255,255,.08);margin-top:9px;overflow:hidden;width:150px}
+.meter i{display:block;height:100%;width:74%;border-radius:99px;
+  background:linear-gradient(90deg,var(--emerald-deep),var(--cyan));box-shadow:0 0 10px rgba(52,216,180,.5)}
+
+.cols{display:grid;grid-template-columns:1.95fr 1fr;gap:18px;align-items:start}
+.panel{padding:22px 24px}
+.panel+.panel{margin-top:18px}
+.p-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.p-head h2{font-family:var(--font-disp);font-size:16.5px;font-weight:600;letter-spacing:.02em}
+.p-head .more{margin-left:auto;font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:4px;transition:color .2s}
+.p-head .more:hover{color:var(--emerald)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{font-size:12px;color:var(--ink-3);padding:6px 13px;border-radius:999px;
+  border:1px solid var(--line-soft);transition:all .22s}
+.tabs button:hover{color:var(--ink-2);border-color:var(--line)}
+.tabs button.on{color:#052018;font-weight:600;background:linear-gradient(120deg,var(--emerald),#6fe8cd);border-color:transparent}
+
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.item{position:relative;padding:16px 16px 14px;border-radius:15px;background:rgba(255,255,255,.04);
+  border:1px solid var(--line-soft);transition:transform .25s,border-color .25s,box-shadow .25s;overflow:hidden}
+.item:hover{transform:translateY(-4px);border-color:rgba(52,216,180,.35);
+  box-shadow:0 18px 36px -18px rgba(0,0,0,.7),0 0 0 1px rgba(52,216,180,.12),0 0 24px -6px rgba(52,216,180,.15)}
+.item.rare:hover{border-color:rgba(139,124,246,.4);box-shadow:0 18px 36px -18px rgba(0,0,0,.7),0 0 24px -6px rgba(139,124,246,.2)}
+.item .gfx{width:52px;height:52px;border-radius:13px;display:grid;place-items:center;margin-bottom:12px;
+  background:radial-gradient(circle at 32% 28%,rgba(52,216,180,.16),rgba(255,255,255,.03) 70%);
+  border:1px solid rgba(255,255,255,.07)}
+.item .nm{font-size:13.5px;font-weight:600}
+.item .meta{display:flex;align-items:center;gap:8px;margin-top:7px}
+.tag{font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-soft);padding:2px 8px;border-radius:99px;letter-spacing:.04em}
+.tag.rare{color:#c3b8fd;border-color:rgba(139,124,246,.35);background:rgba(139,124,246,.08)}
+.item .cnt{margin-left:auto;font-family:var(--font-disp);font-size:12.5px;color:var(--ink-2)}
+.item .acts{position:absolute;right:12px;top:12px;display:flex;gap:6px;opacity:0;transform:translateY(-4px);transition:all .25s}
+.item:hover .acts{opacity:1;transform:none}
+.acts button{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+  background:rgba(10,14,26,.7);border:1px solid var(--line);color:var(--ink-2);backdrop-filter:blur(6px);transition:all .2s}
+.acts button:hover{color:var(--emerald);border-color:rgba(52,216,180,.4)}
+.acts button.d:hover{color:var(--amber);border-color:rgba(240,180,92,.4)}
+
+.act-row{display:flex;align-items:center;gap:13px;padding:12px 4px;border-bottom:1px solid var(--line-soft);transition:background .2s;border-radius:8px}
+.act-row:last-child{border-bottom:none}
+.act-row:hover{background:rgba(255,255,255,.025)}
+.act-dot{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none}
+.act-dot.in{background:rgba(52,216,180,.1);color:var(--emerald)}
+.act-dot.out{background:rgba(240,180,92,.1);color:var(--amber)}
+.act-dot.bonus{background:rgba(79,216,232,.1);color:var(--cyan)}
+.act-row .t{font-size:13px}
+.act-row .t b{font-weight:600}
+.act-row .t span{color:var(--ink-3)}
+.act-row .tm{margin-left:auto;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+
+.srv{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line-soft)}
+.srv:last-child{border-bottom:none}
+.lamp{width:9px;height:9px;border-radius:50%;flex:none;position:relative}
+.lamp.on{background:var(--emerald);box-shadow:0 0 10px rgba(52,216,180,.8)}
+.lamp.on::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(52,216,180,.5);animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.5);opacity:1}80%,100%{transform:scale(1.5);opacity:0}}
+.lamp.warn{background:var(--amber);box-shadow:0 0 8px rgba(240,180,92,.7)}
+.srv .nm{font-size:13px;font-weight:500}
+.srv .st{font-size:11px;color:var(--ink-3);margin-top:2px}
+.srv .ping{margin-left:auto;font-family:var(--font-disp);font-size:12px;color:var(--ink-2)}
+.srv .ping.warn{color:var(--amber)}
+.sec-card .row{display:flex;gap:10px;font-size:12.5px;color:var(--ink-2);padding:8px 0;line-height:1.6;align-items:flex-start}
+.sec-card .row svg{flex:none;margin-top:2px;color:var(--emerald);opacity:.75}
+.kbd{font-family:var(--font-disp);font-size:10.5px;color:var(--ink-2);border:1px solid var(--line);
+  border-bottom-width:2px;border-radius:6px;padding:1px 7px;background:rgba(0,0,0,.3)}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);z-index:99;
+  display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:13px;
+  background:rgba(16,22,38,.85);border:1px solid rgba(52,216,180,.3);backdrop-filter:blur(14px);
+  color:var(--ink);font-size:13px;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.9,.3,1.2);
+  box-shadow:0 20px 50px -14px rgba(0,0,0,.8)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast svg{color:var(--emerald)}
+
+/* ---------- 入场动画 ---------- */
+body[data-view="app"] .rise{animation:rise .7s cubic-bezier(.16,.84,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+body[data-view="app"] #view-app .d1{animation-delay:.04s}
+body[data-view="app"] #view-app .d2{animation-delay:.12s}
+body[data-view="app"] #view-app .d3{animation-delay:.2s}
+body[data-view="app"] #view-app .d4{animation-delay:.28s}
+body[data-view="login"] .login-card{animation:rise .8s cubic-bezier(.16,.84,.3,1) both}
+body[data-view="login"] .cube-scene{animation:rise .9s .1s cubic-bezier(.16,.84,.3,1) both}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1020px){
+  .hero{grid-template-columns:1fr}
+  .stat-cards{grid-template-rows:none;grid-template-columns:1fr 1fr}
+  .cols{grid-template-columns:1fr}
+  .nav{display:none}
+}
+@media (max-width:640px){
+  .wrap{padding:20px 16px 60px}
+  .items{grid-template-columns:repeat(2,1fr)}
+  .stat-cards{grid-template-columns:1fr}
+  .balance .num{font-size:36px}
+  .topbar{padding:12px 16px}
+  .user-chip .un{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body data-view="login">
+<div class="bg"><div class="grid"></div><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div><div class="noise"></div></div>
+<div class="style-badge"><b>风格 A</b>极光玻璃 · 静态原型</div>
+
+<!-- ============ 登录 ============ -->
+<section id="view-login">
+  <div class="cube-scene" aria-hidden="true">
+    <div class="cube cube-1"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div>
+    <div class="cube cube-2"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div>
+    <div class="cube cube-3"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></div>
+  </div>
+  <div class="login-card glass">
+    <div class="brand">
+      <div class="mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d8b4" stroke-width="1.6" stroke-linejoin="round">
+          <path d="M12 2.5 21 7.5 21 16.5 12 21.5 3 16.5 3 7.5Z"/><path d="M3 7.5 12 12.5 21 7.5M12 12.5V21.5" opacity=".7"/>
+        </svg>
+      </div>
+      <div><div class="name">Realm<span>Mesh</span></div><div class="sub">领域网格</div></div>
+    </div>
+    <h1 id="lt-title">欢迎回来</h1>
+    <p class="lede">一个账户，走遍所有服务器。</p>
+    <div class="ltab">
+      <button class="on" data-lt="login" type="button">登 录</button>
+      <button data-lt="reg" type="button">注册新账户</button>
+    </div>
+    <form id="login-form">
+      <div class="field">
+        <label>玩家名</label>
+        <div class="box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.4-3.4 4.1-5 7.5-5s6.1 1.6 7.5 5"/></svg>
+          <input id="f-user" placeholder="3–16 位字母、数字或下划线" autocomplete="username">
+        </div>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <div class="box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.4"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/></svg>
+          <input id="f-pass" type="password" placeholder="6–12 位，大小写敏感" autocomplete="current-password">
+          <button class="eye" type="button" aria-label="显示密码">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>
+        <span>连续 3 次密码错误将进入 5 分钟休息期，跨服务器共享计数；成功登录自动清零。</span>
+      </div>
+      <button class="btn-primary" type="submit">
+        <span id="lt-btn">进入我的资产</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5 18.5 12 13 17.5"/></svg>
+      </button>
+    </form>
+  </div>
+  <p class="login-foot">不进入游戏服务器，也能随时管理你的中心资产</p>
+</section>
+
+<!-- ============ 总览 ============ -->
+<main id="view-app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d8b4" stroke-width="1.6" stroke-linejoin="round">
+          <path d="M12 2.5 21 7.5 21 16.5 12 21.5 3 16.5 3 7.5Z"/><path d="M3 7.5 12 12.5 21 7.5M12 12.5V21.5" opacity=".7"/>
+        </svg>
+      </div>
+      <div><div class="name">Realm<span>Mesh</span></div></div>
+    </div>
+    <nav class="nav">
+      <button class="on" type="button">总览</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">仓库</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">动态</button>
+      <button type="button" data-toast="演示原型：导航仅作展示">服务器</button>
+    </nav>
+    <div class="top-right">
+      <button class="icon-btn" type="button" data-toast="演示原型：通知仅作展示" aria-label="通知">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 9.5a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4s2-1.5 2-6.5Z"/><path d="M10 19a2.2 2.2 0 0 0 4 0"/></svg>
+      </button>
+      <div class="user-chip">
+        <div class="avatar">AC</div>
+        <span class="un">Alex_Craft</span>
+      </div>
+      <button class="icon-btn" type="button" id="btn-logout" aria-label="退出">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5H6.5A1.8 1.8 0 0 0 4.7 6.3v11.4a1.8 1.8 0 0 0 1.8 1.8H14M15.8 8.2 19.6 12l-3.8 3.8M9.5 12h9.6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="hero">
+      <div class="balance glass rise d1">
+        <div>
+          <div class="lbl">中心资产 · 虚拟货币</div>
+          <div class="num mono">12,480<small>金币</small></div>
+          <div class="delta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14 12 8l6 6M12 8v11"/></svg>
+            本周 +320
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <span style="font-size:11.5px;color:var(--ink-3)">最后同步 · 2 分钟前 · Web 端</span>
+          <span style="font-size:11.5px;color:var(--ink-3)">账户 Alex_Craft · 正常</span>
+        </div>
+      </div>
+      <div class="stat-cards rise d2">
+        <div class="stat glass">
+          <div class="ico v">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3 20 7.5v9L12 21 4 16.5v-9L12 3Z"/><path d="M4 7.5 12 12l8-4.5M12 12v9" opacity=".65"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="k">共享仓库</div>
+            <div class="v mono">238 <small>/ 320 格</small></div>
+            <div class="meter"><i></i></div>
+          </div>
+        </div>
+        <div class="stat glass">
+          <div class="ico c">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="6.4" rx="1.6"/><rect x="3.5" y="13.1" width="17" height="6.4" rx="1.6"/><path d="M7 7.7h.01M7 16.3h.01" stroke-width="2.4"/></svg>
+          </div>
+          <div>
+            <div class="k">接入服务器</div>
+            <div class="v mono">3 <small>/ 4 在线</small></div>
+            <div style="font-size:11px;color:var(--amber);margin-top:6px">模组服 · 维护中</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <section class="panel glass rise d3">
+          <div class="p-head">
+            <h2>共享仓库</h2>
+            <span class="tag">跨服同步</span>
+            <button class="more" type="button" data-toast="演示原型：跳转仅作展示">
+              全部物品
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+            </button>
+          </div>
+          <div class="tabs" id="wh-tabs">
+            <button class="on" data-cat="all" type="button">全部</button>
+            <button data-cat="mat" type="button">材料</button>
+            <button data-cat="tool" type="button">工具</button>
+            <button data-cat="build" type="button">建筑</button>
+            <button data-cat="use" type="button">消耗品</button>
+          </div>
+          <div class="items" id="wh-items">
+            <div class="item" data-cat="mat mat-rare rare">
+              <div class="acts">
+                <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+              </div>
+              <div class="gfx"><span class="pxi" data-pix="diamond" data-s="4"><i></i></span></div>
+              <div class="nm">钻石</div>
+              <div class="meta"><span class="tag rare">稀有</span><span class="tag">材料</span><span class="cnt mono">× 64</span></div>
+            </div>
+            <div class="item" data-cat="mat">
+              <div class="acts">
+                <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+              </div>
+              <div class="gfx"><span class="pxi" data-pix="gold" data-s="4"><i></i></span></div>
+              <div class="nm">金锭</div>
+              <div class="meta"><span class="tag">材料</span><span class="cnt mono">× 128</span></div>
+            </div>
+            <div class="item" data-cat="mat">
+              <div class="gfx"><span class="pxi" data-pix="emerald" data-s="4"><i></i></span></div>
+              <div class="nm">绿宝石</div>
+              <div class="meta"><span class="tag">材料</span><span class="cnt mono">× 32</span></div>
+            </div>
+            <div class="item rare" data-cat="mat">
+              <div class="gfx"><span class="pxi" data-pix="netherite" data-s="4"><i></i></span></div>
+              <div class="nm">下界合金锭</div>
+              <div class="meta"><span class="tag rare">稀有</span><span class="tag">材料</span><span class="cnt mono">× 12</span></div>
+            </div>
+            <div class="item" data-cat="mat">
+              <div class="gfx"><span class="pxi" data-pix="pearl" data-s="4"><i></i></span></div>
+              <div class="nm">末影珍珠</div>
+              <div class="meta"><span class="tag">材料</span><span class="cnt mono">× 16</span></div>
+            </div>
+            <div class="item" data-cat="use">
+              <div class="gfx"><span class="pxi" data-pix="potion" data-s="4"><i></i></span></div>
+              <div class="nm">喷溅治疗药水</div>
+              <div class="meta"><span class="tag">消耗品</span><span class="cnt mono">× 6</span></div>
+            </div>
+            <div class="item rare" data-cat="tool">
+              <div class="gfx"><span class="pxi" data-pix="book" data-s="4"><i></i></span></div>
+              <div class="nm">附魔书 · 经验修补</div>
+              <div class="meta"><span class="tag rare">稀有</span><span class="tag">工具</span><span class="cnt mono">× 1</span></div>
+            </div>
+            <div class="item" data-cat="build">
+              <div class="gfx"><span class="pxi" data-pix="concrete" data-s="4"><i></i></span></div>
+              <div class="nm">白色混凝土</div>
+              <div class="meta"><span class="tag">建筑</span><span class="cnt mono">× 256</span></div>
+            </div>
+            <div class="item" data-cat="use">
+              <div class="gfx"><span class="pxi" data-pix="tnt" data-s="4"><i></i></span></div>
+              <div class="nm">TNT</div>
+              <div class="meta"><span class="tag">红石</span><span class="cnt mono">× 8</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel glass rise d4">
+          <div class="p-head"><h2>近期动态</h2>
+            <button class="more" type="button" data-toast="演示原型：跳转仅作展示">全部记录</button>
+          </div>
+          <div class="act-row"><div class="act-dot in"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></div><div class="t"><b>存入 钻石 ×64</b> <span>· 生存一服</span></div><div class="tm mono">今天 14:32</div></div>
+          <div class="act-row"><div class="act-dot out"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></div><div class="t"><b>取出 金锭 ×32</b> <span>· 创造服</span></div><div class="tm mono">今天 13:05</div></div>
+          <div class="act-row"><div class="act-dot bonus"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.6L20 10l-5 3.2 1.5 5.8L12 15.9 7.5 19 9 13.2 4 10l6.1-1.4Z"/></svg></div><div class="t"><b>登录奖励</b> <span>· +50 金币 · Web 端</span></div><div class="tm mono">今天 09:47</div></div>
+          <div class="act-row"><div class="act-dot in"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></div><div class="t"><b>存入 鞘翅 ×1</b> <span>· 模组服</span></div><div class="tm mono">昨天 22:10</div></div>
+        </section>
+      </div>
+
+      <div>
+        <section class="panel glass rise d3">
+          <div class="p-head"><h2>接入服务器</h2><span class="tag mono">3 / 4 在线</span></div>
+          <div class="srv"><span class="lamp on"></span><div><div class="nm">生存一服</div><div class="st">survival-1 · 在线</div></div><span class="ping mono">12ms</span></div>
+          <div class="srv"><span class="lamp on"></span><div><div class="nm">创造服</div><div class="st">creative · 在线</div></div><span class="ping mono">23ms</span></div>
+          <div class="srv"><span class="lamp on"></span><div><div class="nm">小游戏服</div><div class="st">games · 在线</div></div><span class="ping mono">41ms</span></div>
+          <div class="srv"><span class="lamp warn"></span><div><div class="nm">模组服</div><div class="st">modded · 维护中</div></div><span class="ping warn mono">—</span></div>
+        </section>
+
+        <section class="panel glass sec-card rise d4">
+          <div class="p-head"><h2>账户安全</h2></div>
+          <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 7"/></svg><span>登录失败计数跨服务器共享，休息期结束后自动从零重新计数。</span></div>
+          <div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 7"/></svg><span>改密成功后，所有已连接游戏服务器上的该账户将被踢出。</span></div>
+          <div class="row" style="align-items:center;gap:10px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="11" rx="2.4"/><path d="M8 9V6.8a4 4 0 0 1 8 0V9"/></svg>
+            <span>Web 会话有效期 2 小时，期间无需重复登录。</span>
+            <span class="kbd" style="margin-left:auto">⌥ 安全中心</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 7"/></svg>
+  <span id="toast-text"></span>
+</div>
+
+<script>
+/* ---------- 像素图标（box-shadow 渲染） ---------- */
+const PIX = {
+  diamond:{pal:{o:'#0e6b64',l:'#5ce0d6',h:'#ccfff9',d:'#2aa79c'},rows:['....oo....','...ollo...','..olhhlo..','.olhhlllo.','olhhlllllo','ollllllddo','.ollllddo.','..ollddo..','...oddo...','....oo....']},
+  emerald:{pal:{o:'#0a6b39',l:'#2ecc71',h:'#a7f3c9',d:'#169257'},rows:['....oo....','...ollo...','..olhhlo..','.olhhlllo.','olhhlllllo','ollllllddo','.ollllddo.','..ollddo..','...oddo...','....oo....']},
+  gold:{pal:{o:'#8a5a0a',g:'#f2b53a',h:'#ffe38a',d:'#c9871c'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  netherite:{pal:{o:'#15151a',g:'#4a4550',h:'#8d8391',d:'#332f38'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  pearl:{pal:{o:'#0e2a2a',b:'#0f5f5f',l:'#1fa8a8',h:'#7beaea',p:'#7c4dbf'},rows:['...oooo...','..obbbbo..','.oblhbbpbo','obhhhbbbbo','oblbbbbpbo','obbbbbbbbo','obpbbbblbo','.obbbbbbo.','..obbbbo..','...oooo...']},
+  potion:{pal:{o:'#1c2b2b',b:'#bfe3dc',h:'#ffffff',g:'#7ce75a'},rows:['....oo....','...obbo...','...obbo...','..obbbbo..','.obbhbbbo.','.obggggbo.','obggggggbo','obggggggbo','.oggggggo.','..oooooo..']},
+  book:{pal:{o:'#3a2410',R:'#b0542c',p:'#e8d9b0',s:'#9ef7dd',g:'#4a3218'},rows:['..........','.oooooooo.','oRpppppppo','oRppsgpppo','oRpppppppo','oRpppppppo','oRpppppppo','oRpppppppo','.oooooooo.','..........']},
+  concrete:{pal:{o:'#8f8f8f',l:'#f2f2f2',w:'#e3e3e3',d:'#c9c9c9'},rows:['oooooooooo','ollllllllo','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','oddddddddo','oooooooooo']},
+  tnt:{pal:{o:'#6e1c1c',r:'#b03a3a',R:'#d95b4a',w:'#e8dcc8',k:'#22222a'},rows:['.oooooooooo.','orrrrrrrrrro','orRRRRRRRRro','owwwwwwwwwwo','owwkwwwkkwwo','owwwwwwwwwwo','orRRRRRRRRro','orrrrrrrrrro','.oooooooooo.']},
+  steve:{pal:{h:'#3a2a17',s:'#c68e64',e:'#ffffff',b:'#4a3fa8',m:'#8a5a4a'},rows:['hhhhhhhh','hhhhhhhh','hssssssh','sebssebs','ssssssss','ssssssss','ssmmmmss','ssssssss']}
+};
+document.querySelectorAll('.pxi').forEach(el=>{
+  const def = PIX[el.dataset.pix]; if(!def) return;
+  const s = parseFloat(el.dataset.s || '3');
+  const rows = def.rows, shadows = [];
+  rows.forEach((row,y)=>{ [...row].forEach((ch,x)=>{
+    const c = def.pal[ch]; if(c) shadows.push(`${x*s}px ${y*s}px 0 ${c}`);
+  });});
+  el.style.width = rows[0].length*s + 'px';
+  el.style.height = rows.length*s + 'px';
+  const i = el.querySelector('i');
+  i.style.width = s+'px'; i.style.height = s+'px';
+  i.style.boxShadow = shadows.join(',');
+});
+
+/* ---------- 视图切换 ---------- */
+const body = document.body;
+document.getElementById('login-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  body.dataset.view = 'app';
+  window.scrollTo(0,0);
+});
+document.getElementById('btn-logout').addEventListener('click', ()=>{
+  body.dataset.view = 'login';
+  window.scrollTo(0,0);
+});
+
+/* ---------- 登录/注册 tab ---------- */
+const ltTitle = document.getElementById('lt-title');
+const ltBtn = document.getElementById('lt-btn');
+document.querySelectorAll('.ltab button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.ltab button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    if(b.dataset.lt === 'reg'){
+      ltTitle.textContent = '创建中心账户';
+      ltBtn.textContent = '注册并进入';
+    }else{
+      ltTitle.textContent = '欢迎回来';
+      ltBtn.textContent = '进入我的资产';
+    }
+  });
+});
+
+/* ---------- 密码可见 ---------- */
+document.querySelector('.eye').addEventListener('click', function(){
+  const p = document.getElementById('f-pass');
+  p.type = p.type === 'password' ? 'text' : 'password';
+});
+
+/* ---------- 仓库筛选 ---------- */
+document.getElementById('wh-tabs').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#wh-tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const cat = b.dataset.cat;
+  document.querySelectorAll('#wh-items .item').forEach(it=>{
+    it.style.display = (cat === 'all' || it.dataset.cat.split(' ').includes(cat)) ? '' : 'none';
+  });
+});
+
+/* ---------- Toast ---------- */
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toast-text');
+let toastTimer;
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2400);
+}
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-toast]');
+  if(t) showToast(t.dataset.toast);
+});
+</script>
+</body>
+</html>

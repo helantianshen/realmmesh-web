@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RealmMesh · 风格 D 黑曜控制台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090b;
+  --panel:#0e0e11;
+  --panel-2:#131316;
+  --ink:#ececf0;
+  --ink-2:#a1a1aa;
+  --ink-3:#6e6e77;
+  --line:#232327;
+  --line-2:#2e2e33;
+  --acc:#34d399;
+  --acc-dim:rgba(52,211,153,.14);
+  --warn:#d4a24a;
+  --warn-dim:rgba(212,162,74,.13);
+  --mono:'JetBrains Mono','PingFang SC','Microsoft YaHei',monospace;
+  --sans:'Inter','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit;color:inherit}
+.mono{font-family:var(--mono)}
+.up{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+
+/* 像素图标 */
+.pxi{display:inline-block;position:relative;flex:none;image-rendering:pixelated;filter:grayscale(.25) contrast(1.05)}
+.pxi i{position:absolute;left:0;top:0;display:block}
+
+/* 背景网格 */
+.bg{position:fixed;inset:0;z-index:-2;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(1100px 640px at 50% -8%,#000,transparent 72%);
+  mask-image:radial-gradient(1100px 640px at 50% -8%,#000,transparent 72%)}
+
+/* 视图切换 */
+#view-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px}
+#view-app{display:none}
+body[data-view="app"] #view-login{display:none}
+body[data-view="app"] #view-app{display:flex}
+
+/* ---------- 登录 ---------- */
+.login-box{width:min(368px,100%)}
+.wordmark{font-family:var(--mono);font-size:21px;font-weight:600;letter-spacing:.02em;margin-bottom:6px}
+.wordmark em{font-style:normal;color:var(--acc)}
+.login-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:30px;display:flex;align-items:center;gap:8px}
+.login-meta .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.field{margin-bottom:14px}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+.field .box{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);transition:border-color .15s}
+.field .box:focus-within{border-color:#3f3f46}
+.field .box:focus-visible{outline:none}
+.field input{flex:1;background:none;border:none;outline:none;height:44px;font-size:13.5px;padding:0 14px;font-family:var(--mono)}
+.field input::placeholder{color:#4b4b52}
+.eye{color:var(--ink-3);padding:0 12px;display:grid;place-items:center;height:44px}
+.eye:hover{color:var(--ink-2)}
+.login-note{font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--ink-3);border-left:2px solid var(--line-2);
+  padding:2px 0 2px 12px;margin:4px 0 20px}
+.login-note b{color:var(--ink-2);font-weight:500}
+.btn-solid{width:100%;height:44px;background:#fafafa;color:#0a0a0c;font-size:13.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.btn-solid:hover{background:#fff;box-shadow:0 0 24px -6px rgba(255,255,255,.28)}
+.btn-solid:active{transform:scale(.985)}
+.login-alt{margin-top:18px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.login-alt button{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-2)}
+.login-alt button:hover{color:var(--acc)}
+.login-status{margin-top:56px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);display:flex;gap:14px;letter-spacing:.04em}
+.login-status span b{color:var(--acc);font-weight:500}
+
+/* ---------- 布局 ---------- */
+.shell{display:flex;width:100%;min-height:100vh}
+.side{width:222px;flex:none;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;background:rgba(9,9,11,.7);backdrop-filter:blur(10px)}
+.side .wordmark{font-size:15px;padding:0 10px 18px}
+.side .wordmark em{color:var(--acc)}
+.snav{display:flex;flex-direction:column;gap:2px}
+.snav button{display:flex;align-items:center;gap:10px;padding:8px 10px;font-size:13px;color:var(--ink-2);
+  border-left:2px solid transparent;transition:all .13s;text-align:left}
+.snav button:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+.snav button.on{color:var(--ink);background:rgba(255,255,255,.045);border-left-color:var(--acc)}
+.snav button .kbd-hint{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3);opacity:0;transition:opacity .15s}
+.snav button:hover .kbd-hint{opacity:1}
+.snav .sep{height:1px;background:var(--line);margin:10px 4px}
+.side .sysbox{margin-top:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3);line-height:2;padding:10px;border:1px solid var(--line)}
+.side .sysbox .ok{color:var(--acc)}
+
+.main{flex:1;min-width:0}
+.topline{position:sticky;top:0;z-index:40;background:rgba(9,9,11,.82);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 26px;height:52px}
+.crumb{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.crumb b{color:var(--ink);font-weight:500}
+.crumb i{font-style:normal;color:#3f3f46;margin:0 7px}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.kbtn{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  border:1px solid var(--line);padding:6px 10px;background:var(--panel);transition:all .13s}
+.kbtn:hover{color:var(--ink);border-color:var(--line-2)}
+.kbtn kbd{font-size:10px;border:1px solid var(--line);padding:1px 4px;background:var(--bg)}
+.user{display:flex;align-items:center;gap:9px;padding:5px 10px 5px 5px;border:1px solid var(--line);background:var(--panel)}
+.user .av{width:24px;height:24px;background:var(--acc-dim);border:1px solid rgba(52,211,153,.3);color:var(--acc);
+  display:grid;place-items:center;font-family:var(--mono);font-size:9.5px;font-weight:600}
+.user span{font-family:var(--mono);font-size:11.5px}
+
+.content{padding:26px 26px 90px;max-width:1060px}
+
+/* 统计带 */
+.statband{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:var(--panel);margin-bottom:22px}
+.stat{padding:18px 20px;position:relative}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--mono);font-size:27px;font-weight:500;margin-top:10px;letter-spacing:-.01em}
+.stat .v small{font-size:12px;color:var(--ink-3);font-weight:400;margin-left:5px}
+.stat .d{font-family:var(--mono);font-size:11px;margin-top:8px;color:var(--ink-3)}
+.stat .d b{color:var(--acc);font-weight:500}
+.stat .d.warn b{color:var(--warn)}
+
+/* 区块 */
+.sect{margin-bottom:30px}
+.sect-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sect-h h2{font-size:14px;font-weight:600;letter-spacing:.01em}
+.sect-h .cnt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--line);padding:2px 8px}
+.sect-h .link{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.sect-h .link:hover{color:var(--acc)}
+
+/* 表格型仓库 */
+.tbl{border:1px solid var(--line);background:var(--panel)}
+.thead{display:grid;grid-template-columns:minmax(200px,1.6fr) .8fr .7fr 1fr .9fr;gap:10px;
+  padding:9px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.trow{display:grid;grid-template-columns:minmax(200px,1.6fr) .8fr .7fr 1fr .9fr;gap:10px;align-items:center;
+  padding:11px 16px;border-bottom:1px solid var(--line);transition:background .12s}
+.tbl>div:last-child{border-bottom:none}
+.trow:hover{background:rgba(255,255,255,.026)}
+.titem{display:flex;align-items:center;gap:11px;min-width:0}
+.titem .thumb{width:32px;height:32px;border:1px solid var(--line);display:grid;place-items:center;background:var(--bg);flex:none}
+.titem .nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titem .nm .rare{color:#b8a6f0}
+.tcat{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.tcnt{font-family:var(--mono);font-size:12.5px;text-align:right}
+.tsrc{font-family:var(--mono);font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tacts{display:flex;gap:6px;justify-content:flex-end;opacity:0;transition:opacity .15s}
+.trow:hover .tacts{opacity:1}
+.tacts button{width:28px;height:28px;border:1px solid var(--line);color:var(--ink-2);display:grid;place-items:center;transition:all .12s;background:var(--bg)}
+.tacts button:hover{border-color:rgba(52,211,153,.5);color:var(--acc)}
+.tacts button.d:hover{border-color:rgba(212,162,74,.5);color:var(--warn)}
+
+/* 日志型动态 */
+.log{border:1px solid var(--line);background:var(--panel);font-family:var(--mono);font-size:12px}
+.log-r{display:flex;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);line-height:1.6}
+.log-r:last-child{border-bottom:none}
+.log-r:hover{background:rgba(255,255,255,.026)}
+.log-r .t{color:var(--ink-3);flex:none}
+.log-r .m{color:var(--ink-2)}
+.log-r .m b{color:var(--ink);font-weight:500}
+.log-r .val{margin-left:auto;flex:none}
+.log-r .val.in{color:var(--acc)}
+.log-r .val.out{color:var(--warn)}
+
+/* 服务器 */
+.srvs{border:1px solid var(--line);background:var(--panel)}
+.srv-r{display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.srv-r:last-child{border-bottom:none}
+.srv-r:hover{background:rgba(255,255,255,.026)}
+.srv-r .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.srv-r .dot.on{background:var(--acc);box-shadow:0 0 8px rgba(52,211,153,.7)}
+.srv-r .dot.warn{background:var(--warn)}
+.srv-r .nm{font-size:13px}
+.srv-r .nm small{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:9px}
+.spark{margin-left:auto;display:flex;align-items:flex-end;gap:2.5px;height:18px}
+.spark i{width:3.5px;background:#3f3f46}
+.spark i.hi{background:var(--acc)}
+.srv-r .ms{font-family:var(--mono);font-size:11px;color:var(--ink-2);width:52px;text-align:right;flex:none}
+.srv-r .ms.warn{color:var(--warn)}
+
+.two{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,10px);z-index:99;display:flex;align-items:center;gap:10px;
+  padding:11px 18px;background:var(--panel-2);border:1px solid var(--line-2);font-family:var(--mono);font-size:12px;color:var(--ink);
+  opacity:0;pointer-events:none;transition:all .22s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
+
+.style-badge{position:fixed;left:16px;bottom:14px;z-index:60;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--ink-3);border:1px solid var(--line);padding:5px 11px;background:rgba(9,9,11,.8)}
+.style-badge b{color:var(--acc);font-weight:500;margin-right:7px}
+
+/* 入场 */
+body[data-view="app"] .fade{animation:fadeIn .4s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+body[data-view="app"] #view-app .d1{animation-delay:.03s}
+body[data-view="app"] #view-app .d2{animation-delay:.09s}
+body[data-view="app"] #view-app .d3{animation-delay:.15s}
+body[data-view="login"] .login-box{animation:fadeIn .45s ease both}
+
+@media (max-width:900px){
+  .side{display:none}
+  .statband{grid-template-columns:1fr 1fr}
+  .stat:nth-child(3){border-left:none}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .two{grid-template-columns:1fr}
+  .thead{display:none}
+  .trow{grid-template-columns:1fr auto auto}
+  .trow .tcat,.trow .tsrc{display:none}
+  .tacts{opacity:1}
+}
+@media (max-width:560px){
+  .content{padding:18px 14px 70px}
+  .statband{grid-template-columns:1fr}
+  .stat+.stat{border-left:none;border-top:1px solid var(--line)}
+  .crumb .hidem{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body data-view="login">
+<div class="bg"></div>
+<div class="style-badge"><b>STYLE D</b>黑曜控制台 · 静态原型</div>
+
+<!-- ============ 登录 ============ -->
+<section id="view-login">
+  <div class="login-box">
+    <div class="wordmark">REALM<em>/</em>MESH</div>
+    <div class="login-meta"><span class="dot"></span>中心账户 · web client v0.3</div>
+    <form id="login-form">
+      <div class="field">
+        <label>玩家名 / player</label>
+        <div class="box"><input placeholder="3-16 · a-z 0-9 _" autocomplete="username"></div>
+      </div>
+      <div class="field">
+        <label>密码 / password</label>
+        <div class="box">
+          <input id="f-pass" type="password" placeholder="6-12 chars · case-sensitive" autocomplete="current-password">
+          <button class="eye" type="button" aria-label="显示密码">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="login-note">auth policy — 连续 <b>3</b> 次失败进入 <b>300s</b> 休息期，计数跨服务器共享；成功登录即清零。</p>
+      <button class="btn-solid" type="submit">
+        <span>登录</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5 18.5 12 13 17.5"/></svg>
+      </button>
+    </form>
+    <div class="login-alt">
+      <button type="button" data-toast="演示原型：注册仅作展示">注册新账户 →</button>
+      <span>jwt · 2h ttl</span>
+    </div>
+    <div class="login-status">
+      <span>center <b>healthy</b></span><span>grpc <b>3/4</b></span><span>region cn-local</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 总览 ============ -->
+<main id="view-app">
+  <div class="shell">
+    <aside class="side">
+      <div class="wordmark">REALM<em>/</em>MESH</div>
+      <nav class="snav">
+        <button class="on" type="button">总览<span class="kbd-hint">G O</span></button>
+        <button type="button" data-toast="演示原型：导航仅作展示">仓库<span class="kbd-hint">G W</span></button>
+        <button type="button" data-toast="演示原型：导航仅作展示">动态<span class="kbd-hint">G A</span></button>
+        <button type="button" data-toast="演示原型：导航仅作展示">服务器<span class="kbd-hint">G S</span></button>
+        <div class="sep"></div>
+        <button type="button" data-toast="演示原型：导航仅作展示">安全<span class="kbd-hint">G C</span></button>
+        <button type="button" id="btn-logout">退出<span class="kbd-hint">G Q</span></button>
+      </nav>
+      <div class="sysbox">
+        <div>version <span class="ok">v0.3.0</span></div>
+        <div>latency <span class="ok">12ms</span></div>
+        <div>session <span>2h</span></div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topline">
+        <div class="crumb"><span class="hidem">overview</span><i class="hidem">/</i><b>alex_craft</b></div>
+        <div class="top-right">
+          <button class="kbtn" type="button" data-toast="演示原型：搜索仅作展示">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            搜索… <kbd>⌘K</kbd>
+          </button>
+          <div class="user"><div class="av">AC</div><span>Alex_Craft</span></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="statband fade d1">
+          <div class="stat">
+            <div class="k">虚拟货币 / coins</div>
+            <div class="v">12,480<small>G</small></div>
+            <div class="d">7d <b>+320</b> · +2.6%</div>
+          </div>
+          <div class="stat">
+            <div class="k">仓库占用 / slots</div>
+            <div class="v">238<small>/ 320</small></div>
+            <div class="d">usage <b>74.4%</b></div>
+          </div>
+          <div class="stat">
+            <div class="k">服务器 / nodes</div>
+            <div class="v">3<small>/ 4 up</small></div>
+            <div class="d warn">modded <b>maint.</b></div>
+          </div>
+          <div class="stat">
+            <div class="k">本月流转 / txns</div>
+            <div class="v">86<small>笔</small></div>
+            <div class="d">in 61 · out 25</div>
+          </div>
+        </div>
+
+        <div class="two">
+          <div>
+            <div class="sect fade d2">
+              <div class="sect-h">
+                <h2>共享仓库</h2><span class="cnt">9 items</span>
+                <button class="link" type="button" data-toast="演示原型：跳转仅作展示">view all →</button>
+              </div>
+              <div class="tbl">
+                <div class="thead"><span>物品</span><span>分类</span><span style="text-align:right">数量</span><span>来源</span><span style="text-align:right">操作</span></div>
+                <div class="trow">
+                  <div class="titem"><div class="thumb"><span class="pxi" data-pix="diamond" data-s="2.6"><i></i></span></div><span class="nm"><span class="rare">◆</span> 钻石</span></div>
+                  <div class="tcat">材料 · 稀有</div><div class="tcnt mono">64</div><div class="tsrc mono">survival-1 · 10-24</div>
+                  <div class="tacts">
+                    <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                    <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+                <div class="trow">
+                  <div class="titem"><div class="thumb"><span class="pxi" data-pix="gold" data-s="2.6"><i></i></span></div><span class="nm">金锭</span></div>
+                  <div class="tcat">材料</div><div class="tcnt mono">128</div><div class="tsrc mono">creative · 10-23</div>
+                  <div class="tacts">
+                    <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                    <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+                <div class="trow">
+                  <div class="titem"><div class="thumb"><span class="pxi" data-pix="netherite" data-s="2.6"><i></i></span></div><span class="nm"><span class="rare">◆</span> 下界合金锭</span></div>
+                  <div class="tcat">材料 · 稀有</div><div class="tcnt mono">12</div><div class="tsrc mono">survival-1 · 10-21</div>
+                  <div class="tacts">
+                    <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                    <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+                <div class="trow">
+                  <div class="titem"><div class="thumb"><span class="pxi" data-pix="book" data-s="2.6"><i></i></span></div><span class="nm"><span class="rare">◆</span> 附魔书 · 经验修补</span></div>
+                  <div class="tcat">工具 · 稀有</div><div class="tcnt mono">1</div><div class="tsrc mono">modded · 10-22</div>
+                  <div class="tacts">
+                    <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                    <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+                <div class="trow">
+                  <div class="titem"><div class="thumb"><span class="pxi" data-pix="concrete" data-s="2.6"><i></i></span></div><span class="nm">白色混凝土</span></div>
+                  <div class="tcat">建筑</div><div class="tcnt mono">256</div><div class="tsrc mono">creative · 10-20</div>
+                  <div class="tacts">
+                    <button type="button" data-toast="演示原型：存入需要连接游戏服务器" aria-label="存入"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
+                    <button class="d" type="button" data-toast="演示原型：取出需要连接游戏服务器" aria-label="取出"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 13l6 6 6-6"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sect fade d3">
+              <div class="sect-h"><h2>动态日志</h2><span class="cnt">tail -f</span>
+                <button class="link" type="button" data-toast="演示原型：跳转仅作展示">full log →</button>
+              </div>
+              <div class="log">
+                <div class="log-r"><span class="t">10-24 14:32</span><span class="m"><b>warehouse.in</b> diamond ×64 ← survival-1</span><span class="val in">+64 items</span></div>
+                <div class="log-r"><span class="t">10-24 13:05</span><span class="m"><b>warehouse.out</b> gold ×32 → creative</span><span class="val out">-32 items</span></div>
+                <div class="log-r"><span class="t">10-24 09:47</span><span class="m"><b>auth.login</b> web client · ok</span><span class="val in">+50 G</span></div>
+                <div class="log-r"><span class="t">10-23 22:10</span><span class="m"><b>warehouse.in</b> elytra ×1 ← modded</span><span class="val in">+1 item</span></div>
+                <div class="log-r"><span class="t">10-23 21:58</span><span class="m"><b>auth.password</b> changed · sessions kicked</span><span class="val out">kick 2</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="sect fade d2">
+              <div class="sect-h"><h2>接入服务器</h2><span class="cnt">3/4 up</span></div>
+              <div class="srvs">
+                <div class="srv-r"><span class="dot on"></span><div class="nm">生存一服<small>survival-1</small></div>
+                  <div class="spark"><i class="hi" style="height:8px"></i><i style="height:12px"></i><i class="hi" style="height:6px"></i><i style="height:14px"></i><i class="hi" style="height:9px"></i></div><span class="ms mono">12ms</span></div>
+                <div class="srv-r"><span class="dot on"></span><div class="nm">创造服<small>creative</small></div>
+                  <div class="spark"><i style="height:10px"></i><i class="hi" style="height:14px"></i><i style="height:8px"></i><i class="hi" style="height:12px"></i><i style="height:15px"></i></div><span class="ms mono">23ms</span></div>
+                <div class="srv-r"><span class="dot on"></span><div class="nm">小游戏服<small>games</small></div>
+                  <div class="spark"><i class="hi" style="height:14px"></i><i style="height:16px"></i><i class="hi" style="height:10px"></i><i style="height:13px"></i><i class="hi" style="height:16px"></i></div><span class="ms mono">41ms</span></div>
+                <div class="srv-r"><span class="dot warn"></span><div class="nm">模组服<small>modded</small></div>
+                  <div class="spark"><i style="height:3px"></i><i style="height:3px"></i><i style="height:3px"></i><i style="height:3px"></i><i style="height:3px"></i></div><span class="ms warn mono">maint</span></div>
+              </div>
+            </div>
+
+            <div class="sect fade d3">
+              <div class="sect-h"><h2>安全策略</h2><span class="cnt">auth</span></div>
+              <div class="log">
+                <div class="log-r"><span class="t">policy</span><span class="m">失败计数跨服共享，休息期后自动清零</span></div>
+                <div class="log-r"><span class="t">policy</span><span class="m">改密成功后踢出所有已连接游戏服会话</span></div>
+                <div class="log-r"><span class="t">session</span><span class="m">JWT · HS256 · 2h TTL · 无自动续签</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast"><span class="dot"></span><span id="toast-text"></span></div>
+
+<script>
+const PIX = {
+  diamond:{pal:{o:'#0e6b64',l:'#5ce0d6',h:'#ccfff9',d:'#2aa79c'},rows:['....oo....','...ollo...','..olhhlo..','.olhhlllo.','olhhlllllo','ollllllddo','.ollllddo.','..ollddo..','...oddo...','....oo....']},
+  gold:{pal:{o:'#8a5a0a',g:'#f2b53a',h:'#ffe38a',d:'#c9871c'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  netherite:{pal:{o:'#15151a',g:'#4a4550',h:'#8d8391',d:'#332f38'},rows:['..........','..oooooo..','.ohhggggo.','ohgggggggo','oggggggggo','ogggggggdo','.oooooooo.','..........']},
+  book:{pal:{o:'#3a2410',R:'#b0542c',p:'#e8d9b0',s:'#9ef7dd',g:'#4a3218'},rows:['..........','.oooooooo.','oRpppppppo','oRppsgpppo','oRpppppppo','oRpppppppo','oRpppppppo','oRpppppppo','.oooooooo.','..........']},
+  concrete:{pal:{o:'#8f8f8f',l:'#f2f2f2',w:'#e3e3e3',d:'#c9c9c9'},rows:['oooooooooo','ollllllllo','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','lwwwwwwwwd','oddddddddo','oooooooooo']}
+};
+document.querySelectorAll('.pxi').forEach(el=>{
+  const def = PIX[el.dataset.pix]; if(!def) return;
+  const s = parseFloat(el.dataset.s || '3');
+  const rows = def.rows, shadows = [];
+  rows.forEach((row,y)=>{ [...row].forEach((ch,x)=>{
+    const c = def.pal[ch]; if(c) shadows.push(`${x*s}px ${y*s}px 0 ${c}`);
+  });});
+  el.style.width = rows[0].length*s + 'px';
+  el.style.height = rows.length*s + 'px';
+  const i = el.querySelector('i');
+  i.style.width = s+'px'; i.style.height = s+'px';
+  i.style.boxShadow = shadows.join(',');
+});
+
+const body = document.body;
+document.getElementById('login-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  body.dataset.view = 'app';
+  window.scrollTo(0,0);
+});
+document.getElementById('btn-logout').addEventListener('click', ()=>{
+  body.dataset.view = 'login';
+  window.scrollTo(0,0);
+});
+document.querySelector('.eye').addEventListener('click', function(){
+  const p = document.getElementById('f-pass');
+  p.type = p.type === 'password' ? 'text' : 'password';
+});
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toast-text');
+let toastTimer;
+function showToast(msg){
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2400);
+}
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-toast]');
+  if(t) showToast(t.dataset.toast);
+});
+</script>
+</body>
+</html>

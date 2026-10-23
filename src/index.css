@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* RealmMesh「明亮工坊」设计令牌：与 prototypes/style-b-craft-light.html 对齐 */
+@theme {
+  --font-sans: "Inter Variable", "Inter", -apple-system, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-display: "Manrope Variable", "Manrope", "Inter Variable", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+
+  --color-paper: #f7f7f5;
+  --color-card: #ffffff;
+  --color-ink: #17181a;
+  --color-mute: #52565c;
+  --color-faint: #8a8f96;
+  --color-line: #e7e6e2;
+  --color-line-2: #dedcd6;
+
+  --color-em: #0d9d6c;
+  --color-em-deep: #087a54;
+  --color-em-soft: #e5f6ef;
+  --color-em-line: #cbeadd;
+
+  --color-warn: #b97e14;
+  --color-warn-deep: #8f6210;
+  --color-warn-soft: #fdf3e2;
+  --color-warn-line: #f0e2c4;
+
+  --color-grape: #6d5ce8;
+  --color-grape-soft: #efecfc;
+  --color-grape-line: #dcd6f7;
+
+  --color-danger: #b3362a;
+  --color-danger-deep: #8f2a20;
+  --color-danger-soft: #fdefed;
+  --color-danger-line: #f3cfcb;
+
+  --radius-card: 14px;
+  --shadow-sm: 0 1px 2px rgba(23, 24, 26, 0.05);
+  --shadow-md: 0 2px 6px rgba(23, 24, 26, 0.06), 0 12px 28px -12px rgba(23, 24, 26, 0.1);
+  --shadow-lg: 0 4px 10px rgba(23, 24, 26, 0.07), 0 24px 48px -16px rgba(23, 24, 26, 0.16);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    /* 不设置 scrollbar-gutter: stable：它会与 Radix 弹窗滚动锁定的
+       padding-right 补偿叠加，导致弹窗打开时内容左移；页面间的高度
+       稳定改由各布局的 min-height 保证。 */
+  }
+  body {
+    @apply bg-paper text-ink font-sans;
+  }
+  ::selection {
+    background: rgba(13, 157, 108, 0.2);
+  }
+  :focus-visible {
+    outline: 2px solid rgba(13, 157, 108, 0.55);
+    outline-offset: 2px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d4d2cc transparent;
+  }
+}
+
+/* Radix 弹层进出场动画 */
+@keyframes rm-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rm-panel-in {
+  from { opacity: 0; transform: translateX(4px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes rm-center-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.rm-overlay-in {
+  animation: rm-overlay-in 0.18s ease both;
+}
+.rm-panel-in {
+  animation: rm-panel-in 0.16s ease both;
+}
+.rm-center-in {
+  animation: rm-center-in 0.22s cubic-bezier(0.16, 0.84, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-overlay-in,
+  .rm-panel-in,
+  .rm-center-in {
+    animation-duration: 0.01ms !important;
+  }
+}
